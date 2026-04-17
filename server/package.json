@@ -1,5 +1,5 @@
 {
-  "name": "ui-shop",
+  "name": "ui-shop-server",
   "version": "1.0.0",
   "private": true,
   "main": "server.js",
@@ -10,6 +10,6 @@
     "node": ">=18"
   },
   "dependencies": {
-    "express": "^4.22.1"
+    "express": "^4.21.2"
   }
 }
