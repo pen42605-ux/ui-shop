@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>會員商城 · PRIVATE</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="shop.html" class="logo" aria-current="page">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>PRIVATE</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap; justify-content: flex-end">
+          <span class="user-greet" id="user-greet" hidden></span>
+          <span class="agent-chip" id="agent-chip" hidden></span>
+          <button type="button" class="btn-outline btn-sm" id="btn-signout" style="font-size: 0.68rem">
+            登出
+          </button>
+          <a href="cart.html" class="btn-icon cart-btn-wrap" aria-label="購物車">
+            <span aria-hidden="true">🛒</span>
+            <span class="cart-badge" id="cart-badge">0</span>
+          </a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <div class="shell">
+        <h1 class="page-title page-title--gradient">精選商品</h1>
+        <p class="page-sub">以下為示意資料與圖像，金額格式為新台幣。</p>
+        <div id="grid" class="product-grid"></div>
+
+        <nav class="footer-nav" aria-label="次要連結">
+          <a href="index.html">代理驗證</a>
+          <a href="login.html">登入</a>
+          <a href="cart.html">購物車</a>
+          <a href="admin-login.html">後台</a>
+        </nav>
+      </div>
+    </main>
+
+    <div
+      id="shop-gate"
+      class="shop-gate"
+      hidden
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="shop-gate-title"
+      aria-describedby="shop-gate-msg"
+    >
+      <div class="shop-gate__panel card card-glow">
+        <div class="shop-gate__icon" aria-hidden="true">⏸</div>
+        <h2 id="shop-gate-title" class="shop-gate__title">無法瀏覽商品</h2>
+        <p id="shop-gate-msg" class="shop-gate__msg">您的帳號尚未開通，請聯絡代理</p>
+        <div class="shop-gate__actions">
+          <a class="btn-gold" href="login.html">返回登入</a>
+          <a class="btn-outline" href="index.html">代理驗證</a>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        let isApproved = true;
+
+        if (!UISession.ensureMemberSession('login.html', 'index.html')) return;
+
+        var agent = UISession.getAgent();
+        var user = UISession.getUser();
+        var chip = document.getElementById('agent-chip');
+        chip.textContent = agent.code;
+        chip.hidden = false;
+
+        var greet = document.getElementById('user-greet');
+        greet.textContent = user.displayName;
+        greet.hidden = false;
+
+        document.getElementById('btn-signout').addEventListener('click', function () {
+          UISession.signOutCustomer();
+        });
+
+        var gate = document.getElementById('shop-gate');
+        var mainEl = document.getElementById('main');
+
+        if (!isApproved) {
+          gate.hidden = false;
+          document.body.classList.add('shop-gate-open');
+          mainEl.setAttribute('inert', '');
+          mainEl.setAttribute('aria-hidden', 'true');
+          return;
+        }
+
+        UISession.bindCartBadge(document.getElementById('cart-badge'));
+
+        var grid = document.getElementById('grid');
+        MockData.PRODUCTS.forEach(function (p, idx) {
+          var art = document.createElement('article');
+          art.className = 'card card-glow product-card';
+          art.style.animationDelay = idx * 0.07 + 's';
+          art.innerHTML =
+            '<div class="p-img"><img src="' +
+            p.image +
+            '" alt="" width="400" height="280" loading="lazy" /></div>' +
+            '<div class="p-body">' +
+            '<h2 class="p-name">' +
+            p.name +
+            '</h2>' +
+            '<p class="p-price">' +
+            UISession.formatMoney(p.price) +
+            '</p>' +
+            '<button type="button" class="btn-gold" style="width:100%" data-add="' +
+            p.id +
+            '">加入購物車</button></div>';
+          grid.appendChild(art);
+        });
+
+        grid.addEventListener('click', function (e) {
+          var btn = e.target.closest('[data-add]');
+          if (!btn) return;
+          var id = btn.getAttribute('data-add');
+          var p = MockData.PRODUCTS.find(function (x) {
+            return x.id === id;
+          });
+          if (!p) return;
+          CartStore.addItem(p);
+          btn.disabled = true;
+          btn.textContent = '已加入';
+          setTimeout(function () {
+            btn.disabled = false;
+            btn.textContent = '加入購物車';
+          }, 900);
+        });
+      })();
+    </script>
+  </body>
+</html>

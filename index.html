@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>代理驗證 · PRIVATE</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="index.html" class="logo" aria-current="page">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>PRIVATE</span>
+        </a>
+        <a class="btn-outline btn-sm" href="admin-login.html" style="font-size: 0.72rem">後台</a>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <div class="center-stack">
+        <h1 class="page-title page-title--gradient" style="text-align: center">代理驗證</h1>
+        <p class="page-sub" style="text-align: center">請輸入您的代理代碼以存取會員商城。</p>
+
+        <div id="msg" class="msg msg-err" role="status"></div>
+
+        <div class="card card-glow hero-panel">
+          <form id="form-verify" novalidate>
+            <div class="field">
+              <label for="agent-code">代理代碼</label>
+              <input
+                id="agent-code"
+                class="input"
+                name="code"
+                type="text"
+                autocomplete="one-time-code"
+                placeholder="例：GOLD、VIP"
+              />
+            </div>
+            <button type="submit" class="btn-gold" style="width: 100%">驗證</button>
+          </form>
+        </div>
+
+        <nav class="footer-nav" aria-label="次要連結">
+          <a href="admin-login.html">管理後台</a>
+        </nav>
+      </div>
+    </main>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        var form = document.getElementById('form-verify');
+        var input = document.getElementById('agent-code');
+        var msg = document.getElementById('msg');
+
+        function showErr(text) {
+          msg.textContent = text;
+          msg.className = 'msg msg-err is-show';
+        }
+        function hideMsg() {
+          msg.classList.remove('is-show');
+        }
+
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+          hideMsg();
+          var code = input.value.trim();
+          if (!code) {
+            showErr('請輸入代理代碼。');
+            return;
+          }
+          var agent = MockData.resolveAgent(code);
+          if (!agent) {
+            showErr('無效的代碼。');
+            return;
+          }
+          UISession.clearUser();
+          UISession.setAgent(agent);
+          msg.textContent = '驗證成功，正在前往登入…';
+          msg.className = 'msg msg-ok is-show';
+          setTimeout(function () {
+            location.href = 'login.html';
+          }, 550);
+        });
+      })();
+    </script>
+  </body>
+</html>

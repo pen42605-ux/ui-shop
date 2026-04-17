@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>會員登入 · PRIVATE</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="shop.html" class="logo">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>PRIVATE</span>
+        </a>
+        <a class="btn-outline btn-sm" href="index.html" id="link-reverify">重新驗證</a>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <div class="center-stack">
+        <h1 class="page-title page-title--gradient" style="text-align: center">會員登入</h1>
+        <p class="page-sub" style="text-align: center">
+          代理身份：
+          <strong id="agent-label" style="color: var(--gold-2)">—</strong>
+        </p>
+
+        <div class="card card-glow hero-panel">
+          <p class="page-sub" style="margin-top: 0; text-align: center">使用 LINE 完成快速登入（示意流程）。</p>
+          <button type="button" id="btn-line" class="btn-gold" style="width: 100%; margin-bottom: 0.75rem">
+            LINE 登入
+          </button>
+          <p class="page-sub" style="margin: 0; font-size: 0.8rem; text-align: center">此按鈕不會連線至 LINE，僅模擬導向商城。</p>
+        </div>
+
+        <nav class="footer-nav" aria-label="次要連結">
+          <a href="index.html">返回驗證</a>
+          <a id="skip-shop" href="shop.html">略過（測試用）</a>
+        </nav>
+      </div>
+    </main>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        var agent = UISession.getAgent();
+        if (!agent) {
+          location.replace('index.html');
+          return;
+        }
+        if (UISession.getUser()) {
+          location.replace('shop.html');
+          return;
+        }
+        document.getElementById('agent-label').textContent = agent.name + '（' + agent.code + '）';
+
+        document.getElementById('btn-line').addEventListener('click', function () {
+          UISession.simulateLineLogin();
+          location.href = 'shop.html';
+        });
+
+        document.getElementById('skip-shop').addEventListener('click', function (e) {
+          e.preventDefault();
+          UISession.setAgent({ code: 'DEMO', name: '示範代理 · 測試' });
+          UISession.simulateLineLogin('示範會員');
+          location.href = 'shop.html';
+        });
+
+        document.getElementById('link-reverify').addEventListener('click', function () {
+          UISession.clearUser();
+          UISession.clearAgent();
+        });
+      })();
+    </script>
+  </body>
+</html>

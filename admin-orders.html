@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>訂單管理 · PRIVATE ADMIN</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="admin.html" class="logo">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>ADMIN</span>
+        </a>
+        <button type="button" id="btn-out" class="btn-outline btn-sm">登出</button>
+      </div>
+    </header>
+
+    <div class="admin-layout">
+      <aside class="admin-sidebar" aria-label="後台選單">
+        <nav>
+          <a href="admin.html">儀表板</a>
+          <a href="admin-users.html">用戶管理</a>
+          <a href="admin-orders.html" aria-current="page">訂單管理</a>
+          <a href="index.html">返回前台</a>
+        </nav>
+      </aside>
+      <main class="admin-main" id="main">
+        <h1 class="page-title page-title--gradient">訂單管理</h1>
+        <p class="page-sub">資料來自 mock 陣列並存於 <code>localStorage</code>（<code>ui_shop_admin_orders</code>）。點「已出貨」更新狀態。</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>訂單編號</th>
+                <th>用戶</th>
+                <th>狀態</th>
+                <th style="width: 110px">操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+      </main>
+    </div>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/admin-store.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        if (!UISession.requireAdminOr('admin-login.html')) return;
+
+        document.getElementById('btn-out').addEventListener('click', function () {
+          UISession.setAdmin(false);
+          location.href = 'admin-login.html';
+        });
+
+        var tbody = document.getElementById('tbody');
+
+        function rowHtml(o) {
+          var shipped = o.status === '已出貨';
+          return (
+            '<td style="font-family:ui-monospace,monospace">' +
+            o.id +
+            '</td><td>' +
+            o.user +
+            '</td><td class="st">' +
+            o.status +
+            '</td><td><button type="button" class="btn-gold btn-sm btn-ship" data-id="' +
+            o.id +
+            '"' +
+            (shipped ? ' disabled' : '') +
+            '>' +
+            (shipped ? '已完成' : '已出貨') +
+            '</button></td>'
+          );
+        }
+
+        function render() {
+          tbody.innerHTML = '';
+          AdminData.getOrders().forEach(function (o) {
+            var tr = document.createElement('tr');
+            tr.dataset.id = o.id;
+            tr.innerHTML = rowHtml(o);
+            tbody.appendChild(tr);
+          });
+        }
+
+        tbody.addEventListener('click', function (e) {
+          var btn = e.target.closest('.btn-ship');
+          if (!btn || btn.disabled) return;
+          var id = btn.getAttribute('data-id');
+          if (!id) return;
+          if (AdminData.markOrderShipped(id)) {
+            var tr = btn.closest('tr');
+            tr.style.animation = 'none';
+            tr.offsetHeight;
+            tr.style.animation = 'pageIn 0.45s ease-out';
+            render();
+          }
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

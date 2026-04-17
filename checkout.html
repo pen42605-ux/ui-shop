@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>結帳 · PRIVATE</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="shop.html" class="logo">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>PRIVATE</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap">
+          <button type="button" class="btn-outline btn-sm" id="btn-signout" style="font-size: 0.68rem">登出</button>
+          <a href="cart.html" class="btn-outline btn-sm">返回購物車</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <div class="shell" style="max-width: 640px; margin: 0 auto; width: 100%">
+        <h1 class="page-title page-title--gradient">結帳</h1>
+        <p class="page-sub">請填寫收件資訊（示意表單，不會送出至伺服器）。</p>
+
+        <div class="card hero-panel">
+          <form id="checkout-form" novalidate>
+            <div class="check-grid" style="margin-bottom: 1rem">
+              <div class="field" style="margin-bottom: 0">
+                <label for="name">姓名</label>
+                <input id="name" class="input" name="name" type="text" autocomplete="name" required />
+              </div>
+              <div class="field" style="margin-bottom: 0">
+                <label for="phone">電話</label>
+                <input id="phone" class="input" name="phone" type="tel" autocomplete="tel" required />
+              </div>
+            </div>
+            <div class="field">
+              <label for="addr">地址</label>
+              <textarea id="addr" class="input" name="address" rows="3" required style="resize: vertical"></textarea>
+            </div>
+
+            <p class="page-sub" style="margin: 0 0 0.5rem; font-size: 0.78rem; text-transform: uppercase">
+              付款方式
+            </p>
+            <label class="radio-card" style="margin-bottom: 1rem">
+              <input type="radio" name="pay" value="cod" checked />
+              <span><strong>貨到付款</strong><br /><span class="page-sub" style="margin: 0; font-size: 0.8rem">唯一選項（示意）</span></span>
+            </label>
+
+            <div class="total-bar" style="margin-bottom: 1rem">
+              <span class="page-sub" style="margin: 0">訂單金額</span>
+              <strong id="sum">NT$ 0</strong>
+            </div>
+
+            <button type="submit" class="btn-gold" style="width: 100%">下單</button>
+          </form>
+        </div>
+
+        <nav class="footer-nav" aria-label="次要連結">
+          <a href="shop.html">商城</a>
+          <a href="cart.html">購物車</a>
+        </nav>
+      </div>
+    </main>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        if (!UISession.ensureMemberSession('login.html', 'index.html')) return;
+
+        document.getElementById('btn-signout').addEventListener('click', function () {
+          UISession.signOutCustomer();
+        });
+
+        if (!CartStore.getCart().length) {
+          location.replace('cart.html');
+          return;
+        }
+
+        document.getElementById('sum').textContent = UISession.formatMoney(CartStore.totalPrice());
+
+        var u = UISession.getUser();
+        if (u && u.displayName) {
+          document.getElementById('name').value = u.displayName;
+        }
+
+        function makeOrderId() {
+          var hex = '';
+          for (var i = 0; i < 6; i++) {
+            hex += ((Math.random() * 16) | 0).toString(16);
+          }
+          return 'ORD-' + hex.toUpperCase() + Date.now().toString(36).slice(-4).toUpperCase();
+        }
+
+        document.getElementById('checkout-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var name = document.getElementById('name').value.trim();
+          var phone = document.getElementById('phone').value.trim();
+          var addr = document.getElementById('addr').value.trim();
+          if (!name || !phone || !addr) {
+            alert('請完整填寫姓名、電話與地址。');
+            return;
+          }
+          var id = makeOrderId();
+          UISession.setLastOrder(id);
+          CartStore.clear();
+          location.href = 'success.html';
+        });
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>後台登入 · PRIVATE</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="index.html" class="logo">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>PRIVATE</span>
+        </a>
+        <a class="btn-outline btn-sm" href="index.html">前台</a>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <div class="center-stack">
+        <h1 class="page-title page-title--gradient" style="text-align: center">管理後台</h1>
+        <p class="page-sub" style="text-align: center">輸入後台密碼（示意：長度 ≥ 4 即視為成功）。</p>
+
+        <div class="card card-glow hero-panel">
+          <form id="admin-form" novalidate>
+            <div class="field">
+              <label for="pw">密碼</label>
+              <input id="pw" class="input" type="password" autocomplete="current-password" placeholder="••••••••" />
+            </div>
+            <button type="submit" class="btn-gold" style="width: 100%">登入</button>
+          </form>
+        </div>
+
+        <nav class="footer-nav" aria-label="次要連結">
+          <a href="index.html">返回驗證頁</a>
+        </nav>
+      </div>
+    </main>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        document.getElementById('admin-form').addEventListener('submit', function (e) {
+          e.preventDefault();
+          var v = document.getElementById('pw').value;
+          if (v.length < 4) {
+            alert('密碼至少 4 字元（示意驗證）。');
+            return;
+          }
+          UISession.setAdmin(true);
+          location.href = 'admin.html';
+        });
+      })();
+    </script>
+  </body>
+</html>

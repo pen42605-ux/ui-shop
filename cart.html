@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>購物車 · PRIVATE</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="shop.html" class="logo">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>PRIVATE</span>
+        </a>
+        <div style="display: flex; align-items: center; gap: 0.45rem; flex-wrap: wrap">
+          <button type="button" class="btn-outline btn-sm" id="btn-signout" style="font-size: 0.68rem">登出</button>
+          <a href="shop.html" class="btn-outline btn-sm">繼續購物</a>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <div class="shell" style="max-width: 640px; margin: 0 auto; width: 100%">
+        <h1 class="page-title page-title--gradient">購物車</h1>
+        <p class="page-sub">購物車資料儲存在此瀏覽器的 localStorage。</p>
+
+        <div id="empty" class="card hero-panel" style="display: none; text-align: center">
+          <p class="page-sub" style="margin: 0">購物車是空的。</p>
+          <a class="btn-gold" href="shop.html" style="margin-top: 1rem; display: inline-flex">前往商城</a>
+        </div>
+
+        <div id="panel" style="display: none">
+          <div id="list" class="cart-list"></div>
+          <div class="total-bar">
+            <span class="page-sub" style="margin: 0">合計</span>
+            <strong id="total">NT$ 0</strong>
+          </div>
+          <a
+            id="btn-checkout"
+            class="btn-gold"
+            href="checkout.html"
+            style="width: 100%; margin-top: 1rem; box-sizing: border-box; text-align: center"
+          >
+            前往結帳
+          </a>
+        </div>
+
+        <nav class="footer-nav" aria-label="次要連結">
+          <a href="shop.html">商城</a>
+          <a href="login.html">登入</a>
+        </nav>
+      </div>
+    </main>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        if (!UISession.ensureMemberSession('login.html', 'index.html')) return;
+
+        document.getElementById('btn-signout').addEventListener('click', function () {
+          UISession.signOutCustomer();
+        });
+
+        var empty = document.getElementById('empty');
+        var panel = document.getElementById('panel');
+        var list = document.getElementById('list');
+        var totalEl = document.getElementById('total');
+        var btnCheckout = document.getElementById('btn-checkout');
+
+        function thumbLetter(name) {
+          var s = String(name || '').trim();
+          return s ? s.charAt(0).toUpperCase() : '·';
+        }
+
+        function render() {
+          var items = CartStore.getCart();
+          if (!items.length) {
+            empty.style.display = 'block';
+            panel.style.display = 'none';
+            return;
+          }
+          empty.style.display = 'none';
+          panel.style.display = 'block';
+          list.innerHTML = '';
+          items.forEach(function (it) {
+            var row = document.createElement('div');
+            row.className = 'cart-row';
+            row.innerHTML =
+              '<div class="cart-thumb cart-thumb--placeholder" aria-hidden="true">' +
+              thumbLetter(it.name) +
+              '</div>' +
+              '<div><div style="font-weight:700">' +
+              it.name +
+              '</div><div class="page-sub" style="margin:0.15rem 0 0;font-size:0.8rem">' +
+              UISession.formatMoney(it.price) +
+              '</div>' +
+              '<div class="qty-row">' +
+              '<button type="button" class="qty-btn" data-d="' +
+              it.id +
+              '" aria-label="減少數量">−</button>' +
+              '<span style="min-width:2ch;text-align:center;font-weight:800">' +
+              it.qty +
+              '</span>' +
+              '<button type="button" class="qty-btn" data-u="' +
+              it.id +
+              '" aria-label="增加數量">+</button>' +
+              '<button type="button" class="btn-outline btn-sm" data-rm="' +
+              it.id +
+              '" style="margin-left:0.35rem">移除</button></div></div>' +
+              '<div style="text-align:right;font-weight:800">' +
+              UISession.formatMoney(it.price * it.qty) +
+              '</div>';
+            list.appendChild(row);
+          });
+          totalEl.textContent = UISession.formatMoney(CartStore.getTotal());
+        }
+
+        list.addEventListener('click', function (e) {
+          var du = e.target.getAttribute('data-d');
+          var uu = e.target.getAttribute('data-u');
+          var rm = e.target.getAttribute('data-rm');
+          if (du) CartStore.decreaseQty(du);
+          if (uu) CartStore.increaseQty(uu);
+          if (rm) CartStore.remove(rm);
+          render();
+        });
+
+        window.addEventListener('ui-cart-changed', render);
+        render();
+      })();
+    </script>
+  </body>
+</html>

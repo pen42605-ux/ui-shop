@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>儀表板 · PRIVATE ADMIN</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="admin.html" class="logo" aria-current="page">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>ADMIN</span>
+        </a>
+        <button type="button" id="btn-out" class="btn-outline btn-sm">登出</button>
+      </div>
+    </header>
+
+    <div class="admin-layout">
+      <aside class="admin-sidebar" aria-label="後台選單">
+        <nav>
+          <a href="admin.html" aria-current="page">儀表板</a>
+          <a href="admin-users.html">用戶管理</a>
+          <a href="admin-orders.html">訂單管理</a>
+          <a href="index.html">返回前台</a>
+        </nav>
+      </aside>
+      <div class="admin-main" id="main">
+        <h1 class="page-title page-title--gradient">營運總覽</h1>
+        <p class="page-sub">數字連動 <code>AdminData</code> mock 陣列（localStorage）。</p>
+
+        <div class="stat-grid">
+          <div class="stat-card card-glow">
+            <h3>待出貨訂單</h3>
+            <p class="num" id="stat-pending-ship">0</p>
+          </div>
+          <div class="stat-card card-glow">
+            <h3>待審核會員</h3>
+            <p class="num" id="stat-pending-users">0</p>
+          </div>
+        </div>
+
+        <div class="card hero-panel">
+          <h2 class="page-title page-title--gradient" style="font-size: 1.05rem; margin: 0">快速操作</h2>
+          <p class="page-sub">管理會員開通狀態與出貨進度。</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem">
+            <a class="btn-gold" href="admin-users.html">用戶管理</a>
+            <a class="btn-outline" href="admin-orders.html">訂單管理</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="js/mock-data.js"></script>
+    <script src="js/admin-store.js"></script>
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        if (!UISession.requireAdminOr('admin-login.html')) return;
+
+        document.getElementById('btn-out').addEventListener('click', function () {
+          UISession.setAdmin(false);
+          location.href = 'admin-login.html';
+        });
+
+        function refreshStats() {
+          var orders = AdminData.getOrders();
+          var users = AdminData.getUsers();
+          var pendingShip = orders.filter(function (o) {
+            return o.status !== '已出貨';
+          }).length;
+          var pendingUsers = users.filter(function (u) {
+            return u.status !== 'active';
+          }).length;
+          document.getElementById('stat-pending-ship').textContent = String(pendingShip);
+          document.getElementById('stat-pending-users').textContent = String(pendingUsers);
+        }
+
+        refreshStats();
+        window.addEventListener('admin-data-changed', refreshStats);
+        window.addEventListener('storage', function (e) {
+          if (e.key === 'ui_shop_admin_orders' || e.key === 'ui_shop_admin_users') refreshStats();
+        });
+      })();
+    </script>
+  </body>
+</html>

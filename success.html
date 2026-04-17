@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>訂單成功 · PRIVATE</title>
+    <link rel="stylesheet" href="css/app.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main">主要內容</a>
+
+    <header class="topbar" role="banner">
+      <div class="topbar-inner">
+        <a href="shop.html" class="logo">
+          <span class="logo-mark" aria-hidden="true"></span>
+          <span>PRIVATE</span>
+        </a>
+      </div>
+    </header>
+
+    <main id="main" class="page">
+      <div class="center-stack">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h1 class="page-title page-title--gradient" style="text-align: center">訂單成立</h1>
+        <p class="page-sub" style="text-align: center">感謝您的購買，此為前端示意流程。</p>
+        <p id="user-thanks" class="page-sub" style="text-align: center; margin-top: -0.75rem"></p>
+
+        <p class="page-sub" style="text-align: center; margin-bottom: 0.25rem">訂單編號</p>
+        <p id="order-id" class="order-id">—</p>
+
+        <div style="margin-top: 1.75rem; display: flex; flex-direction: column; gap: 0.65rem">
+          <a class="btn-gold" href="shop.html" style="width: 100%; box-sizing: border-box; text-align: center">返回商城</a>
+          <a class="btn-outline" href="cart.html" style="width: 100%; box-sizing: border-box; text-align: center">查看購物車</a>
+        </div>
+
+        <nav class="footer-nav" aria-label="次要連結">
+          <a href="index.html">代理驗證</a>
+          <a href="admin-login.html">後台</a>
+        </nav>
+      </div>
+    </main>
+
+    <script src="js/ui-common.js"></script>
+    <script>
+      (function () {
+        if (!UISession.getAgent()) {
+          location.replace('index.html');
+          return;
+        }
+        if (!UISession.getUser()) {
+          location.replace('login.html');
+          return;
+        }
+        var id = UISession.getLastOrder();
+        if (!id) {
+          location.replace('shop.html');
+          return;
+        }
+        document.getElementById('order-id').textContent = id;
+        var u = UISession.getUser();
+        document.getElementById('user-thanks').textContent = u ? '會員：' + u.displayName + ' · 代理：' + UISession.getAgentCode() : '';
+      })();
+    </script>
+  </body>
+</html>
